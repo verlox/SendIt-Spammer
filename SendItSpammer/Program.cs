@@ -100,19 +100,19 @@ namespace SendItSpammer
 
         static void Main(string[] args)
         {
-            var props = new StartupProperties {
+            var props = new Core.StartupProperties {
                 LogoString = @"                    _ _ _                                                   
  ___  ___ _ __   __| (_) |_   ___ _ __   __ _ _ __ ___  _ __ ___   ___ _ __ 
 / __|/ _ \ '_ \ / _` | | __| / __| '_ \ / _` | '_ ` _ \| '_ ` _ \ / _ \ '__|
 \__ \  __/ | | | (_| | | |_  \__ \ |_) | (_| | | | | | | | | | | |  __/ |   
 |___/\___|_| |_|\__,_|_|\__| |___/ .__/ \__,_|_| |_| |_|_| |_| |_|\___|_|   
                                  |_|",
-                Author = new StartupAuthorProperties
+                Author = new Core.StartupAuthorProperties
                 {
                     Name = "verlox",
                     Url = "verlox.cc"
                 },
-                Title = new StartupConsoleTitleProperties
+                Title = new Core.StartupConsoleTitleProperties
                 {
                     Text = "Sendit spammer by verlox"
                 },

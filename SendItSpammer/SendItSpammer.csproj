@@ -45,8 +45,9 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="Veylib">
-      <HintPath>..\..\Veylib\Veylib\bin\Release\Veylib.dll</HintPath>
+    <Reference Include="Veylib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Veylib\Veylib\bin\Debug\Veylib.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
