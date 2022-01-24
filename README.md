@@ -2,7 +2,7 @@
 This is a spammer for the story based app on Snap
 
 ## Preview
-![fullscreen](https://github.com/verlox/SendIt-Spammer/preview.png?raw=true)
+![fullscreen](https://github.com/verlox/SendIt-Spammer/blob/master/preview.png?raw=true)
 
 ## Usage
 1. Download the latest release
