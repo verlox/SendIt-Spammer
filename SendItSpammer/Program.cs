@@ -116,7 +116,7 @@ namespace SendItSpammer
                 {
                     Text = "Sendit spammer by verlox"
                 },
-                MOTD = "running fags since 2020",
+                MOTD = "running endpoints since 2020",
                 SilentStart = true,
             };
             core.Start(props);
