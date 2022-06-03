@@ -24,7 +24,19 @@ namespace SendItSpammer
         static Random rand = new Random();
 
         static int sentReqs = 0;
-        static async void sendReq(string recId, string content)
+
+        static string gen(int len)
+        {
+            char[] allchars = "abcdef123456789012345678901234567890".ToCharArray();
+            var sb = new StringBuilder();
+
+            for (var x =0;x < len;x++)
+                sb.Append(allchars[rand.Next(0, allchars.Length - 1)]);
+
+            return sb.ToString();
+        }
+
+        static async void sendReq(string recId, string content, dynamic info)
         {
             dynamic reqJson = new ExpandoObject();
 
@@ -39,8 +51,9 @@ namespace SendItSpammer
             reqJson.data.question = content;
 
             reqJson.ext_data = new ExpandoObject();
-            reqJson.ext_data.sticker_id = "8748ac40-6301-4ed7-a0e3-b2d196fbdcb1";
-            reqJson.ext_data.author_shadow_token = $"5eb5b415-{rand.Next(1000, 9999)}-{rand.Next(1000, 9999)}-{rand.Next(1000, 9999)}-623c68893654";
+            reqJson.ext_data.sticker_id = (string)info.payload.sticker.id;
+            reqJson.ext_data.author_shadow_token = $"{gen(8)}-{gen(4)}-{gen(4)}-{gen(4)}-{gen(12)}";
+            reqJson.ext_data.snap_reference_id = null;
 
             var req = WebRequest.Create("https://api.getsendit.com/v1/posts");
             req.Method = "POST";
@@ -230,7 +243,7 @@ namespace SendItSpammer
                     {
                         try
                         {
-                            sendReq((string)author.id, content); 
+                            sendReq((string)author.id, content, info); 
                         }
                         catch { }
                     }
