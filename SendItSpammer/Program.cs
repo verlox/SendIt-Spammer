@@ -36,7 +36,7 @@ namespace SendItSpammer
             return sb.ToString();
         }
 
-        static async void sendReq(string recId, string content, dynamic info)
+        static void sendReq(string recId, string content, dynamic info)
         {
             dynamic reqJson = new ExpandoObject();
 
