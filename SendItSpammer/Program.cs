@@ -125,7 +125,7 @@ namespace SendItSpammer
 
         static void Main(string[] args)
         {
-            Console.WindowHeight = 50;
+            Console.WindowHeight = Console.LargestWindowHeight < 50 ? Console.LargestWindowHeight : 50;
             var props = new Core.StartupProperties {
                 LogoString = @"                    _ _ _                                                   
  ___  ___ _ __   __| (_) |_   ___ _ __   __ _ _ __ ___  _ __ ___   ___ _ __ 
