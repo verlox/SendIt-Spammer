@@ -36,6 +36,8 @@ namespace SendItSpammer
             return sb.ToString();
         }
 
+        static int index = 0;
+        static List<WebProxy> proxies;
         static void sendReq(string recId, string content, dynamic info)
         {
             dynamic reqJson = new ExpandoObject();
@@ -60,6 +62,12 @@ namespace SendItSpammer
             req.ContentType = "application/json";
             req.Headers.Add("App-Id", "c2ad997f-1bf2-4f2c-b5fd-83926e8f3c65");
             req.Headers.Add("App-Version", "1.0");
+            
+            //req.Proxy = proxies[index];
+            if (index + 1 > proxies.Count)
+                index = 0;
+            else
+                index++;
 
             // Write request
             var str = req.GetRequestStream();
@@ -182,6 +190,10 @@ namespace SendItSpammer
 
             if (resp != "Yes")
                 Environment.Exit(0);
+
+            proxies = new List<WebProxy>();
+            foreach (var prox in File.ReadAllLines("proxies.txt"))
+                proxies.Add(new WebProxy { Address = new Uri($"http://{prox.Split(':')[0]}:{prox.Split(':')[1]}"), Credentials = new NetworkCredential(prox.Split(':')[2], prox.Split(':')[3]) });
 
             string trolling = @"[0;34;40m                                                                                                    [0m
 [0;34;40m                           .[0;32;40m.[0;31;40m:[0;34;40m:[0;32;40m:[0;31;40m:[0;34;40m;[0;32;40m;[0;31;40m;[0;34;40m;[0;32;40m;[0;31;40m;[0;34;40m;[0;32;40m;[0;31;40m;[0;34;40m;[0;32;40m;[0;31;40m;[0;34;40m;[0;32;40m;[0;31;40m;[0;34;40m:[0;32;40m:[0;31;40m:[0;34;40m.[0;32;40m.[0;31;40m.[0;34;40m.[0;32;40m.[0;31;40m    [0;34;40m                                        [0m
