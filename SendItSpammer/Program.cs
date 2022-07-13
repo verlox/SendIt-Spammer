@@ -25,9 +25,9 @@ namespace SendItSpammer
 
         static int sentReqs = 0;
 
-        static string gen(int len)
+        static string gen(int len, string charset = "abcdef123456789012345678901234567890")
         {
-            char[] allchars = "abcdef123456789012345678901234567890".ToCharArray();
+            char[] allchars = charset.ToCharArray();
             var sb = new StringBuilder();
 
             for (var x =0;x < len;x++)
@@ -77,6 +77,7 @@ namespace SendItSpammer
                     return;
 
                 rawRes = new StreamReader(ex.Response.GetResponseStream()).ReadToEnd();
+                Debug.WriteLine(rawRes);
             }
 
             try
@@ -235,7 +236,7 @@ namespace SendItSpammer
             core.WriteLine(new Core.MessageProperties { Time = null, Label = null }, trolling);
             core.Delay(1000);
 
-            for (var x =0;x < 40; x++)
+            for (var x = 0; x < 40; x++)
             {
                 new Thread(() =>
                 {
@@ -243,7 +244,7 @@ namespace SendItSpammer
                     {
                         try
                         {
-                            sendReq((string)author.id, content, info); 
+                            sendReq((string)author.id, $"[{gen(5, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")}] {content}", info);
                         }
                         catch { }
                     }
