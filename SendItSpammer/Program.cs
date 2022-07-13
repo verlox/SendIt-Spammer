@@ -25,9 +25,9 @@ namespace SendItSpammer
 
         static int sentReqs = 0;
 
-        static string gen(int len)
+        static string gen(int len, string charset = "abcdef123456789012345678901234567890")
         {
-            char[] allchars = "abcdef123456789012345678901234567890".ToCharArray();
+            char[] allchars = charset.ToCharArray();
             var sb = new StringBuilder();
 
             for (var x =0;x < len;x++)
@@ -36,6 +36,8 @@ namespace SendItSpammer
             return sb.ToString();
         }
 
+        static int index = 0;
+        static List<WebProxy> proxies;
         static void sendReq(string recId, string content, dynamic info)
         {
             dynamic reqJson = new ExpandoObject();
@@ -60,6 +62,12 @@ namespace SendItSpammer
             req.ContentType = "application/json";
             req.Headers.Add("App-Id", "c2ad997f-1bf2-4f2c-b5fd-83926e8f3c65");
             req.Headers.Add("App-Version", "1.0");
+            
+            //req.Proxy = proxies[index];
+            if (index + 1 > proxies.Count)
+                index = 0;
+            else
+                index++;
 
             // Write request
             var str = req.GetRequestStream();
@@ -77,6 +85,7 @@ namespace SendItSpammer
                     return;
 
                 rawRes = new StreamReader(ex.Response.GetResponseStream()).ReadToEnd();
+                Debug.WriteLine(rawRes);
             }
 
             try
@@ -182,6 +191,10 @@ namespace SendItSpammer
             if (resp != "Yes")
                 Environment.Exit(0);
 
+            proxies = new List<WebProxy>();
+            foreach (var prox in File.ReadAllLines("proxies.txt"))
+                proxies.Add(new WebProxy { Address = new Uri($"http://{prox.Split(':')[0]}:{prox.Split(':')[1]}"), Credentials = new NetworkCredential(prox.Split(':')[2], prox.Split(':')[3]) });
+
             string trolling = @"[0;34;40m                                                                                                    [0m
 [0;34;40m                           .[0;32;40m.[0;31;40m:[0;34;40m:[0;32;40m:[0;31;40m:[0;34;40m;[0;32;40m;[0;31;40m;[0;34;40m;[0;32;40m;[0;31;40m;[0;34;40m;[0;32;40m;[0;31;40m;[0;34;40m;[0;32;40m;[0;31;40m;[0;34;40m;[0;32;40m;[0;31;40m;[0;34;40m:[0;32;40m:[0;31;40m:[0;34;40m.[0;32;40m.[0;31;40m.[0;34;40m.[0;32;40m.[0;31;40m    [0;34;40m                                        [0m
 [0;34;40m                     :[0;33;5;40;100m%[0;37;5;40;100mX[0;1;37;97;47m.S88[0;37;5;47;107m88@XXXXSS8[0;1;37;97;47m@t[0;1;30;90;47m.;%t%%SSX@88@@XS%t%%%SX8[0;37;5;40;100m88[0;36;5;40;100m   [0;30;5;40;100mS[0;1;30;90;40m8[0;34;40m.[0;32;40m.[0;31;40m    [0;34;40m                       [0m
@@ -235,7 +248,7 @@ namespace SendItSpammer
             core.WriteLine(new Core.MessageProperties { Time = null, Label = null }, trolling);
             core.Delay(1000);
 
-            for (var x =0;x < 40; x++)
+            for (var x = 0; x < 40; x++)
             {
                 new Thread(() =>
                 {
@@ -243,7 +256,7 @@ namespace SendItSpammer
                     {
                         try
                         {
-                            sendReq((string)author.id, content, info); 
+                            sendReq((string)author.id, $"[{gen(5, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")}] {content}", info);
                         }
                         catch { }
                     }
