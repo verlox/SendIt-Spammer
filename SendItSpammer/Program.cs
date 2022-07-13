@@ -13,7 +13,7 @@ using System.Drawing;
 using Newtonsoft.Json;
 
 // Custom
-using Veylib.CLIUI;
+using Veylib.ICLI;
 using Veylib;
 
 namespace SendItSpammer
