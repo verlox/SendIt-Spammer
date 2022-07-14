@@ -13,6 +13,17 @@ using Newtonsoft.Json;
 // Custom
 using Veylib.ICLI;
 
+/*
+ * Imma be the first to admit, that this is dumbass code
+ * and time wasted. I only made this to oneup my friend
+ * who was using Python and Selenium to imitate mouse
+ * clicks.
+ * 
+ * Anyways, enjoy causing chaos. Star it if you like it.
+ * 
+ * verlox [https://github.com/verlox] [https://verlox.cc]
+ */
+
 namespace SendItSpammer
 {
     internal class Program
