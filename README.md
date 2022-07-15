@@ -22,4 +22,5 @@
 5. Watch the numbers rise up
 
 ## Disclaimer
-This tends to get patched every once in a while since a developer is [watching this repo](https://user-images.githubusercontent.com/83199049/178832103-7fe877df-6169-4c48-aa60-0fba1604ea3c.png), when it does, just drop an issue explaining what happened, and I'll try to find time to fix it.
+* This tends to get patched every once in a while since a developer is [watching this repo](https://user-images.githubusercontent.com/83199049/178832103-7fe877df-6169-4c48-aa60-0fba1604ea3c.png), when it does, just drop an issue explaining what happened, and I'll try to find time to fix it.
+* This is only for educational purposes, and I take no credit in what any actions you, the user and possible downloader, take.
