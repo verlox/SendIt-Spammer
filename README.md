@@ -8,6 +8,12 @@
   * Supports proxies with username and passwords
 * A goodish PC
 
+## Proxies information
+* Must be HTTP/HTTPS
+* Must be in format `host:port` or `host:port:username:password`
+* Must be in same directory as spammer and named `proxies.txt`
+
+
 ## Usage
 1. Download the latest release in [releases](https://github.com/verlox/SendIt-Spammer/releases)
 2. Extract the downloaded .zip
