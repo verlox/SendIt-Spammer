@@ -3,6 +3,11 @@
 ## Preview
 ![fullscreen](https://github.com/verlox/SendIt-Spammer/blob/master/Previews/preview.png?raw=true)
 
+## Requirements
+* Proxies, free or paid
+  * Supports proxies with username and passwords
+* A goodish PC
+
 ## Usage
 1. Download the latest release in [releases](https://github.com/verlox/SendIt-Spammer/releases)
 2. Extract the downloaded .zip
