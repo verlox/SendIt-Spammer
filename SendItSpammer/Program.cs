@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Net;
 using System.IO;
 using System.Drawing;
+using System.Collections.Generic;
 
 // Nuget
 using Newtonsoft.Json;
@@ -62,6 +63,9 @@ namespace SendItSpammer
             return sb.ToString();
         }
 
+        static List<WebProxy> proxies = new List<WebProxy>();
+        static int proxyIndex = 0;
+
         /// <summary>
         /// Send the request to the API
         /// </summary>
@@ -105,6 +109,16 @@ namespace SendItSpammer
 
             // 5 seconds until it times out, so we dont sit and waste resources
             req.Timeout = 5000;
+
+            // If there's proxies to use, abuse em
+            if (proxies.Count > 0)
+            {
+                // Set proxy
+                req.Proxy = proxies[proxyIndex];
+
+                // Increment by one or reset back to 0 if it's about to overflow.
+                proxyIndex = proxyIndex >= proxies.Count - 1 ? 0 : proxyIndex + 1;
+            }
 
             // Write the request data
             var str = req.GetRequestStream();
@@ -239,7 +253,8 @@ namespace SendItSpammer
                 },
                 MOTD = new Core.StartupMOTDProperties
                 {
-                    Text = "running endpoints since 2020",
+                    Text = "destroying beta developers and pasters since 2020",
+                    DividerColor = Color.Purple
                 },
             };
 
@@ -250,6 +265,43 @@ namespace SendItSpammer
 
             // Start UI
             core.Start(props);
+
+        // Get proxies
+        ProxyCheck:
+
+            /*
+             * With full disrespect, patch deez nuts Nicholas.
+             */
+            core.WriteLine("Checking for proxies...");
+            
+            // See if the file exists
+            if (File.Exists("proxies.txt"))
+            {
+                // Read all lines
+                foreach (string line in File.ReadAllLines("proxies.txt"))
+                {
+                    // Fields
+                    string[] fields = line.Split(':');
+
+                    // Allow for private proxies (username and password protected) and free proxies (open)
+                    if (fields.Length > 2)
+                        proxies.Add(new WebProxy($"http://{fields[0]}:{fields[1]}", true, null, new NetworkCredential(fields[2], fields[3])));
+                    else
+                        proxies.Add(new WebProxy($"http://{fields[0]}:{fields[1]}"));
+                }
+
+                // Fully imported.
+                core.WriteLine($"Using a total of {proxies.Count} proxies");
+            } else
+            {
+                // Couldn't find proxies.txt
+                core.WriteLine(Color.Red, "Proxies are required to use this application, download some and name it ", null, "proxies.txt", Color.Red, " to continue");
+                core.WriteLine("Press any button to recheck");
+
+                // Delay until a key is pressed, then go back
+                Console.ReadKey();
+                goto ProxyCheck;
+            }
 
             // Get basic information
             string link = core.ReadLine("Link : ");
@@ -272,6 +324,8 @@ namespace SendItSpammer
                 core.WriteLine("Invalid input");
                 goto ConnectionLimit;
             }
+
+            
 
             // Get sticker information
             var info = getInfo(link.Split('/')[4].Split('?')[0]);
@@ -363,7 +417,7 @@ namespace SendItSpammer
                         try
                         {
                             // They a goner.
-                            sendReq((string)author.id, $"[{gen(5, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")}] {content}", info);
+                            sendReq((string)author.id, $"{gen(5, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")} - {content} - {gen(5, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")}", info);
                         }
                         catch { }
                     }
