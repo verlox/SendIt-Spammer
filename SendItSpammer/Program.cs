@@ -66,6 +66,20 @@ namespace SendItSpammer
         static List<WebProxy> proxies = new List<WebProxy>();
         static int proxyIndex = 0;
 
+        static WebProxy getProxy()
+        {
+            if (proxies.Count > 0)
+            {
+                // Increment by one or reset back to 0 if it's about to overflow.
+                proxyIndex = proxyIndex >= proxies.Count - 1 ? 1 : proxyIndex + 1;
+
+                // Return proxy
+                return proxies[proxyIndex - 1];
+            }
+            else
+                return null;
+        }
+
         /// <summary>
         /// Send the request to the API
         /// </summary>
@@ -111,14 +125,7 @@ namespace SendItSpammer
             req.Timeout = 5000;
 
             // If there's proxies to use, abuse em
-            if (proxies.Count > 0)
-            {
-                // Set proxy
-                req.Proxy = proxies[proxyIndex];
-
-                // Increment by one or reset back to 0 if it's about to overflow.
-                proxyIndex = proxyIndex >= proxies.Count - 1 ? 0 : proxyIndex + 1;
-            }
+            req.Proxy = getProxy();
 
             // Write the request data
             var str = req.GetRequestStream();
@@ -170,11 +177,10 @@ namespace SendItSpammer
                     // Finally update the titlebar with the *very cool* success
                     core.UpdateTitleStatus($"Sent {sentReqs} requests");
                 }
-            } catch (Exception ex)
+            } catch
             {
                 // Damn :mfwsad:
-                core.WriteLine(Color.Red, "We do a little trolling?");
-                Debug.WriteLine(ex);
+                core.WriteLine(Color.Red, "Failed to deserialize JSON, probably ratelimited.");
             }
         }
 
@@ -189,6 +195,9 @@ namespace SendItSpammer
             var req = WebRequest.Create($"https://api.getsendit.com/v1/stickers/{id}");
             req.Headers.Add("App-Id", "c2ad997f-1bf2-4f2c-b5fd-83926e8f3c65");
             req.Headers.Add("App-Version", "1.0");
+
+            // Use proxy
+            req.Proxy = getProxy();
 
             // Default fallback for JSON deserialization later
             string rawRes = "{}";
@@ -206,7 +215,15 @@ namespace SendItSpammer
             }
 
             // Deserialize data
-            dynamic json = JsonConvert.DeserializeObject(rawRes);
+            dynamic json;
+            try
+            {
+                json = JsonConvert.DeserializeObject(rawRes);
+            } catch
+            {
+                core.WriteLine(Color.Red, "Failed to deserialize JSON, probably ratelimited.");
+                return null;
+            }
 
             // Output for debug
             Debug.WriteLine(rawRes);
@@ -328,7 +345,20 @@ namespace SendItSpammer
             
 
             // Get sticker information
+            Info:
             var info = getInfo(link.Split('/')[4].Split('?')[0]);
+
+            // Make sure information was returned
+            if (info == null)
+            {
+                // Bad.
+                core.WriteLine("Press any button to recheck");
+                
+                // Wait until input
+                Console.ReadKey();
+                goto Info;
+            }
+
             var author = info.payload.sticker.author;
 
             // Create the ASCII table to display all the information in a *sexy* format
