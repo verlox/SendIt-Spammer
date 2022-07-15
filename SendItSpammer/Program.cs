@@ -19,6 +19,11 @@ using Veylib.ICLI;
  * who was using Python and Selenium to imitate mouse
  * clicks.
  * 
+ * This is now maintained to piss off the Sendit AR "developer"
+ * Nicholas Dominici. Also their shitty API can barely handle
+ * the power this gives out, and I've partially downed them
+ * before without issue.
+ * 
  * Anyways, enjoy causing chaos. Star it if you like it.
  * 
  * verlox [https://github.com/verlox] [https://verlox.cc]
